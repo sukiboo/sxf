@@ -1,4 +1,4 @@
-name: lirio-experimental-framework
+name: synthetic-experimental-framework
 channels:
   - defaults
 dependencies:

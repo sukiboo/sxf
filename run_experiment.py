@@ -28,14 +28,14 @@ if __name__ == '__main__':
     # parse arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('--load', '-l', default=False)
-    parser.add_argument('--config', '-c', default='./config.yml')
+    parser.add_argument('--config', '-c', default='config.yml')
     args = parser.parse_args()
 
     # load or run the experiment
     if args.load:
         exp = load_exp(args.load)
     else:
-        params_exp = yaml.safe_load(open(args.config))
+        params_exp = yaml.safe_load(open(f'./configs/{args.config}'))
         exp = Experiment(params_exp)
         exp.run()
 
