@@ -1,16 +1,15 @@
-
 import numpy as np
 
 
 class RewardFunction:
-    '''generate reward values given to the agent'''
+    """Generate reward values given to the agent."""
 
     def __init__(self, params):
         self.__dict__.update(params)
         self.configure_reward()
 
     def configure_reward(self):
-        '''configure reward function'''
+        """Configure reward function."""
         if self.reward_type == 'scale':
             self.scale = self.params_cont['scale']
             self.compute_reward = self.compute_reward_scale
@@ -25,14 +24,14 @@ class RewardFunction:
             raise ValueError(f'reward type \'{self.reward_type}\' is not implemented...')
 
     def compute_reward_scale(self, s, action_index=None):
-        '''compute continuous reward function by scaling the feedback'''
+        """Compute continuous reward function by scaling the feedback."""
         a = self.actions[action_index] if action_index is not None else self.actions
         f = self.get_feedback(s,a)
         r = self.scale * f
         return r
 
     def compute_reward_interval(self, s, action_index=None):
-        '''compute continuous reward values by mapping feedback signal to the interval'''
+        """Compute continuous reward values by mapping feedback signal to the interval."""
         F = self.get_feedback(s, self.actions)
         f_min = F.min(axis=1, keepdims=True)
         f_max = F.max(axis=1, keepdims=True)
@@ -41,7 +40,7 @@ class RewardFunction:
         return r
 
     def compute_reward_disc(self, s, action_index=None):
-        '''compute discrete reward values'''
+        """Compute discrete reward values."""
         F = self.get_feedback(s, self.actions)
         R = self.r_vals[np.argsort(F, axis=1)]
         r = R[0,action_index] if action_index is not None else R

@@ -1,4 +1,3 @@
-
 import numpy as np
 import pandas as pd
 import matplotlib as mpl
@@ -14,7 +13,7 @@ sns.set_theme(style='darkgrid', palette=sbn_base, font='monospace')
 
 
 def plot_reward(data, smoothing, norm=True):
-    '''plot received reward values'''
+    """Plot received reward values."""
     R = data.reward_norm if norm else data.reward
     R = pd.concat([pd.DataFrame(0, index=range(-smoothing,0), columns=R.columns), R])
     R = R.rolling(smoothing, min_periods=smoothing).mean()
@@ -29,7 +28,7 @@ def plot_reward(data, smoothing, norm=True):
     plt.close()
 
 def plot_loss(data, smoothing):
-    '''plot observed loss values'''
+    """Plot observed loss values."""
     L = pd.concat([pd.DataFrame(data.loss.iloc[[0]*smoothing]), data.loss])
     L = L.rolling(smoothing, min_periods=smoothing).mean()
     L.index += 1
@@ -45,7 +44,7 @@ def plot_loss(data, smoothing):
     plt.close()
 
 def plot_actions(data):
-    '''plot indices of the actions taken'''
+    """Plot indices of the actions taken."""
     actions = data.actions.copy()
     actions.insert(actions.columns.size-1, 'optimal', actions.pop('env'))
     sns.set_palette(sbn_base)
@@ -61,7 +60,7 @@ def plot_actions(data):
     plt.close()
 
 def plot_state_embeddings_cossim(data, low=10, high=90):
-    '''plot absolute values of cosine similarity of state embeddings'''
+    """Plot absolute values of cosine similarity of state embeddings."""
     emb_cossim, emb_cossim_low, emb_cossim_high = {}, {}, {}
     for name in data.emb_s.keys():
         emb_cossim.update({name: []})
@@ -87,7 +86,7 @@ def plot_state_embeddings_cossim(data, low=10, high=90):
     plt.close()
 
 def plot_action_embeddings_cossim(data, low=10, high=90):
-    '''plot absolute values of cosine similarity of action embeddings'''
+    """Plot absolute values of cosine similarity of action embeddings."""
     emb_cossim, emb_cossim_low, emb_cossim_high = {}, {}, {}
     for name in data.emb_a.keys():
         emb_cossim.update({name: []})
@@ -113,7 +112,7 @@ def plot_action_embeddings_cossim(data, low=10, high=90):
     plt.close()
 
 def plot_action_dist_gif(data, fps=5, num_s=100):
-    '''plot computed probability distributions as a gif'''
+    """Plot computed probability distributions as a gif."""
     dist = data.get_action_dist(num_s=num_s)
     num_plots = 1 + len(data.exp.agents)
     fig = plt.figure(figsize=(6*num_plots,6))
@@ -141,7 +140,7 @@ def plot_action_dist_gif(data, fps=5, num_s=100):
     plt.close()
 
 def plot_weights_gif(data, fps=10):
-    '''plot agents' weights as gifs'''
+    """Plot agents' weights as gifs."""
     data.weights = data.get_weights()
     for agent in data.exp.agents:
         weight = data.weights[agent.name]
@@ -164,14 +163,15 @@ def plot_weights_gif(data, fps=10):
         plt.close()
 
 def plot_embeddings_gif(data, fps=5, method='pca', num_s=None):
-    '''plot embedding of state and action embeddings as a gif'''
+    """Plot embedding of state and action embeddings as a gif."""
     data.emb = data.get_embeddings(method=method, num_s=num_s)
     num_plots = 1 + len(data.exp.agents)
     num_frames = 1 + data.exp.num_steps // data.exp.ckpt_step
     fig = plt.figure(figsize=(6*num_plots,6))
     axs = [fig.add_axes([.02+n/num_plots, .06, 1/num_plots-.03, .84]) for n in range(num_plots)]
+
     def plot_dist_frame(t):
-        '''plot a single frame'''
+        """Plot a single frame."""
         for ax in axs:
             ax.cla()
         fig.suptitle(f'State embeddings after {t*data.exp.ckpt_step} steps', fontweight='bold')
@@ -184,12 +184,13 @@ def plot_embeddings_gif(data, fps=5, method='pca', num_s=None):
             if len(data.emb[name]) > num_frames:
                 axs[k+1].scatter(data.emb[name][t+num_frames][:,0], data.emb[name][t+num_frames][:,1])
             axs[k+1].set_title(name, fontweight='bold')
+
     emb_gif = anim.FuncAnimation(fig, plot_dist_frame, frames=num_frames)
     emb_gif.save(f'{data.img_dir}/embeddings_{method}.gif', fps=fps, dpi=100)
     plt.close()
 
 def plot_action_histogram(data):
-    '''plot agents' action selection histograms throughout the training process'''
+    """Plot agents' action selection histograms throughout the training process."""
     hist_index = np.arange(1 + data.exp.num_steps // data.exp.ckpt_step) * data.exp.ckpt_step
     for name in data.dist:
         sns.set_palette('Paired')

@@ -1,4 +1,3 @@
-
 import gym
 import numpy as np
 
@@ -11,7 +10,7 @@ gym.logger.set_level(40)
 
 
 class Environment(gym.Env):
-    '''generate synthetic contextual bandit environment'''
+    """Generate synthetic contextual bandit environment."""
 
     def __init__(self, params):
         super().__init__()
@@ -20,21 +19,21 @@ class Environment(gym.Env):
         self.reset_env()
 
     def set_random_seed(self):
-        '''fix random seed for reproducibility'''
+        """Fix random seed for reproducibility."""
         self.rng = np.random.default_rng(seed=self.seed)
         self.seed_state = self.rng.integers(1e+09)
         self.seed_action = self.rng.integers(1e+09)
         self.seed_feedback = self.rng.integers(1e+09)
 
     def reset_env(self):
-        '''setup the environment'''
+        """Setup the environment."""
         self.setup_state_space()
         self.setup_action_space()
         self.setup_feedback_signal()
         self.setup_reward_function()
 
     def setup_state_space(self):
-        '''generate state space'''
+        """Generate state space."""
         self.params_state.update({'seed': self.seed_state})
         self.StateSpace = StateSpace(self.params_state)
         self.observe = self.StateSpace.observe_state
@@ -42,14 +41,14 @@ class Environment(gym.Env):
                                                 shape=(self.StateSpace.dim,), dtype=np.float32)
 
     def setup_action_space(self):
-        '''generate action space'''
+        """Generate action space."""
         self.params_action.update({'seed': self.seed_action})
         self.ActionSpace = ActionSpace(self.params_action)
         self.actions = self.ActionSpace.generate_available_actions()
         self.action_space = gym.spaces.Discrete(self.ActionSpace.num)
 
     def setup_feedback_signal(self):
-        '''generate feedback signal'''
+        """Generate feedback signal."""
         self.params_feedback.update({'dim_s': self.StateSpace.dim,
                                      'dim_a': self.ActionSpace.dim,
                                      'seed': self.seed_feedback})
@@ -57,7 +56,7 @@ class Environment(gym.Env):
         self.get_feedback = self.FeedbackSignal.get_feedback
 
     def setup_reward_function(self):
-        '''configure reward values that agent receives'''
+        """Configure reward values that agent receives."""
         self.params_reward.update({'actions': self.actions,
                                    'num_a': self.ActionSpace.num,
                                    'get_feedback': self.get_feedback})
@@ -65,19 +64,19 @@ class Environment(gym.Env):
         self.compute_reward = self.RewardFunction.compute_reward
 
     def reset(self):
-        '''observe a new state'''
+        """Observe a new state."""
         self.state = self.observe().flatten()
         return self.state
 
     def step(self, action_index):
-        '''given an observed state take an action and receive reward'''
+        """Given an observed state take an action and receive reward."""
         reward = self.compute_reward(self.state, action_index).item()
         done = True
         info = {}
         return self.state, reward, done, info
 
     def get_env_stats(self, steps):
-        '''compute the average/minimum/maximum reward values and optimal actions'''
+        """Compute the average/minimum/maximum reward values and optimal actions."""
         self.reset_env()
         S = self.observe(num=steps)
         r_vals = self.compute_reward(S)

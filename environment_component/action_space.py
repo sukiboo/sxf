@@ -1,16 +1,15 @@
-
 import numpy as np
 
 
 class ActionSpace:
-    '''setup action space and sample available actions'''
+    """Setup action space and sample available actions."""
 
     def __init__(self, params):
         self.__dict__.update(params)
         self.rng = np.random.default_rng(seed=self.seed)
 
     def generate_available_actions(self, num=None):
-        '''generate the set of available actions'''
+        """Generate the set of available actions."""
         if num is None:
             num = self.num
         if self.dist == 'uniform':

@@ -1,4 +1,3 @@
-
 import os
 import time
 import yaml
@@ -12,14 +11,14 @@ from agent_component.agent import Agent
 
 
 class Experiment:
-    '''setup the experiment'''
+    """Setup the experiment."""
 
     def __init__(self, params):
         self.__dict__.update(params)
         self.setup_experiment()
 
     def setup_experiment(self):
-        '''configure experiment components'''
+        """Configure experiment components."""
         if self.exp_name is None:
             self.exp_name = str(int(time.time()))
         os.makedirs(f'./exp_data/{self.exp_name}', exist_ok=True)
@@ -29,13 +28,13 @@ class Experiment:
         self.setup_environment()
 
     def set_random_seed(self):
-        '''fix random seed for reproducibility'''
+        """Fix random seed for reproducibility."""
         self.rng = np.random.default_rng(seed=self.seed)
         self.seed_env = self.rng.integers(1e+09)
         self.seed_agent = self.rng.integers(1e+09)
 
     def setup_environment(self):
-        '''create an environment with specified parameters'''
+        """Create an environment with specified parameters."""
         self.params_env.update({'seed': self.seed_env})
         self.env = Environment(self.params_env)
         env_r, env_a = self.env.get_env_stats(steps=self.num_steps)
@@ -43,7 +42,7 @@ class Experiment:
         self.stats['a'].update(env_a)
 
     def setup_agent(self, params_agent):
-        '''create an agent with specified parameters'''
+        """Create an agent with specified parameters."""
         params_agent.update({'dim_s': self.env.StateSpace.dim,
                              'actions': self.env.actions,
                              'seed': self.seed_agent})
@@ -55,7 +54,7 @@ class Experiment:
         return agent
 
     def run(self):
-        '''train agents on the environment'''
+        """Train agents on the environment."""
         print(f'running experiment \'{self.exp_name}\'...')
         for params_agent in self.params_agent:
             agent = self.setup_agent(params_agent)
@@ -74,7 +73,7 @@ class Experiment:
         self.save_exp()
 
     def env_interact(self, agent):
-        '''simulate an agent-environment interaction'''
+        """Simulate an agent-environment interaction."""
         self.s = self.env.reset()
         self.a = agent.sample_action(self.s)
         _, self.r, _, _ = self.env.step(self.a)
@@ -83,7 +82,7 @@ class Experiment:
         self.record_data(agent)
 
     def record_data(self, agent):
-        '''record an agent-environment interaction data'''
+        """Record an agent-environment interaction data."""
         self.stats['r'][agent.name].append(self.r)
         self.stats['a'][agent.name].append(self.a)
         self.stats['l'][agent.name].append(agent.loss.numpy())
@@ -91,7 +90,7 @@ class Experiment:
             agent.checkpoint_policy(self.t)
 
     def save_exp(self):
-        '''save experiment data to a file'''
+        """Save experiment data to a file."""
         save_dir = f'./exp_data/{self.exp_name}'
         os.makedirs(save_dir, exist_ok=True)
         with open(f'{save_dir}/data.pkl', 'wb') as save_file:

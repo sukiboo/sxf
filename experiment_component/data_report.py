@@ -1,4 +1,3 @@
-
 import os
 import numpy as np
 import pandas as pd
@@ -11,7 +10,7 @@ np.set_printoptions(precision=3, suppress=True)
 
 
 class DataReport:
-    '''compute and report the outcome of an experiment'''
+    """Compute and report the outcome of an experiment."""
 
     def __init__(self, exp):
         self.exp = exp
@@ -21,7 +20,7 @@ class DataReport:
         self.compute_metrics()
 
     def evaluate_agents(self, num_s=10000):
-        '''deterministically evaluate agents on the environment'''
+        """Deterministically evaluate agents on the environment."""
         self.exp.env.reset_env()
         S = self.exp.env.observe(num=num_s)
         R = self.exp.env.compute_reward(S)
@@ -40,7 +39,7 @@ class DataReport:
             eval_file.write(eval_str)
 
     def compute_metrics(self):
-        '''compute various metrics'''
+        """Compute various metrics."""
         print('computing metrics...')
         self.reward, self.reward_norm = self.get_reward()
         self.actions = self.get_actions()
@@ -50,7 +49,7 @@ class DataReport:
         self.emb_a = self.get_action_embeddings()
 
     def report(self):
-        '''report and visualize various metrics'''
+        """Report and visualize various metrics."""
         plot_actions(self)
         plot_loss(self, smoothing=100)
         plot_reward(self, smoothing=5000, norm=True)
@@ -59,14 +58,14 @@ class DataReport:
         plot_action_embeddings_cossim(self)
 
     def full_report(self):
-        '''report and visualize various metrics'''
+        """Report and visualize various metrics."""
         self.report()
         plot_action_dist_gif(self, num_s=100)
-        ##plot_embeddings_gif(self, method='pca', num_s=200)
-        ##plot_weights_gif(self)
+        plot_embeddings_gif(self, method='pca', num_s=200)
+        plot_weights_gif(self)
 
     def get_reward(self):
-        '''get reward and normalized reward values'''
+        """Get reward and normalized reward values."""
         R = pd.DataFrame(self.exp.stats['r'])
         R_n = R.sub(R['avg'], axis=0)
         R_n = R_n.div(R_n['max'], axis=0)
@@ -74,17 +73,17 @@ class DataReport:
         return R, R_n
 
     def get_actions(self):
-        '''get selected actions'''
+        """Get selected actions."""
         A = pd.DataFrame(self.exp.stats['a'])
         return A
 
     def get_loss(self):
-        '''get loss values'''
+        """Get loss values."""
         L = pd.DataFrame(self.exp.stats['l'])
         return L
 
     def get_action_dist(self, num_s):
-        '''compute average probability distributions over the action space'''
+        """Compute average probability distributions over the action space."""
         self.exp.env.reset_env()
         S = self.exp.env.observe(num=num_s)
         R = self.exp.env.compute_reward(S)
@@ -100,7 +99,7 @@ class DataReport:
         return dist
 
     def get_weights(self):
-        '''get agents' weights'''
+        """Get agents' weights."""
         weights = {agent.name: [] for agent in self.exp.agents}
         for agent in self.exp.agents:
             for checkpoint in agent.manager.checkpoints:
@@ -109,7 +108,7 @@ class DataReport:
         return weights
 
     def get_state_embeddings(self, num_s=None):
-        '''compute state embeddings'''
+        """Compute state embeddings."""
         if num_s is not None:
             self.exp.env.reset_env()
             S = self.exp.env.observe(num=num_s)
@@ -129,7 +128,7 @@ class DataReport:
         return emb
 
     def get_action_embeddings(self, num_a=None):
-        '''compute action embeddings'''
+        """Compute action embeddings."""
         if num_a is not None:
             self.exp.env.reset_env()
             A = self.exp.env.ActionSpace.generate_available_actions(num=num_a)
@@ -146,7 +145,7 @@ class DataReport:
         return emb
 
     def get_embeddings(self, method='pca', num_s=None):
-        '''compute embeddings on the state and action branches'''
+        """Compute embeddings on the state and action branches."""
         if method == 'pca':
             proj = lambda x: PCA(n_components=2).fit_transform(x)
         elif method == 'tsne':

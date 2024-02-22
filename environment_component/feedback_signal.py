@@ -1,9 +1,8 @@
-
 import numpy as np
 
 
 class SyntheticGaussianMapping:
-    '''generate synthetic feature extractor'''
+    """Generate synthetic feature extractor."""
 
     def __init__(self, params):
         self.__dict__.update(params)
@@ -12,7 +11,7 @@ class SyntheticGaussianMapping:
         self.initialize_weights()
 
     def initialize_weights(self):
-        '''initialize the network from the normal distribution'''
+        """Initialize the network from the normal distribution."""
         self.dims = [self.dim_in, *self.dim_layers, self.dim_out]
         self.num_layers = len(self.dims) - 1
         self.weights = {}
@@ -20,7 +19,7 @@ class SyntheticGaussianMapping:
             self.weights[l] = self.rng.normal(scale=1., size=(self.dims[l]+1,self.dims[l+1]))
 
     def propagate(self, x):
-        '''propagate input through the network'''
+        """Propagate input through the network."""
         z = np.array(x, ndmin=2)
         for l in range(self.num_layers):
             z = np.concatenate([np.ones((z.shape[0],1)), z], axis=1)
@@ -32,7 +31,7 @@ class SyntheticGaussianMapping:
 
 
 class FeedbackSignal:
-    '''generate synthetic feedback signal'''
+    """Generate synthetic feedback signal."""
 
     def __init__(self, params):
         self.__dict__.update(params)
@@ -41,7 +40,7 @@ class FeedbackSignal:
         self.generate_action_embedding()
 
     def generate_state_embedding(self):
-        '''generate state feature map'''
+        """Generate state feature map."""
         self.seed_s = self.rng.integers(1e+09)
         self.params_s = {'dim_in': self.dim_s, 'dim_layers': self.arch_s,
                          'dim_out': self.dim_feature, 'seed': self.seed_s}
@@ -49,7 +48,7 @@ class FeedbackSignal:
         self.feature_s = lambda s: self.feature_map_s.propagate(s)
 
     def generate_action_embedding(self):
-        '''generate action feature map'''
+        """Generate action feature map."""
         self.seed_a = self.rng.integers(1e+09)
         self.params_a = {'dim_in': self.dim_a, 'dim_layers': self.arch_a,
                          'dim_out': self.dim_feature, 'seed': self.seed_a}
@@ -57,7 +56,7 @@ class FeedbackSignal:
         self.feature_a = lambda a: self.feature_map_a.propagate(a)
 
     def feature_relevance(self, s, a):
-        '''measure state and action relevance in the latent feature space'''
+        """Measure state and action relevance in the latent feature space."""
         if self.relevance == 'cossim':
             norm_s = np.linalg.norm(s, axis=1, keepdims=True)
             norm_a = np.linalg.norm(a, axis=1, keepdims=True)
@@ -69,7 +68,7 @@ class FeedbackSignal:
         return rel
 
     def get_feedback(self, s, a):
-        '''compute generated feedback signal on a given state-action pair'''
+        """Compute generated feedback signal on a given state-action pair."""
         self.feedback = self.feature_relevance(self.feature_s(s), self.feature_a(a))
         return self.feedback
 

@@ -1,10 +1,9 @@
-
 import tensorflow as tf
 from tensorflow.keras.layers import Dense
 
 
 class NetworkArchitecture(tf.keras.Model):
-    '''create policy network of specified architecture'''
+    """Create policy network of specified architecture."""
 
     def __init__(self, params):
         super().__init__()
@@ -14,7 +13,7 @@ class NetworkArchitecture(tf.keras.Model):
         self.configure_network()
 
     def configure_network(self):
-        '''initialize and build the model'''
+        """Initialize and build the model."""
         tf.random.set_seed(self.seed)
         if self.arch_type == 'ffnn':
             self.create_network_ffnn()
@@ -27,14 +26,14 @@ class NetworkArchitecture(tf.keras.Model):
         self.build(input_shape=(None,self.dim_s))
 
     def create_network_ffnn(self):
-        '''create network with feed-forward architecture'''
+        """Create network with feed-forward architecture."""
         self.layers_s = []
         for nodes in self.arch:
             self.layers_s.append(Dense(nodes, activation=self.activation, name='state_layer'))
         self.layer_out = Dense(self.num_a, activation=None, name='output_layer')
 
     def create_network_drrn(self):
-        '''create network with DRRN architecture'''
+        """Create network with DRRN architecture."""
         self.actions_tf = tf.convert_to_tensor(self.actions, dtype=tf.float32)
         self.layers_s, self.layers_a = [], []
         for nodes in self.arch:
@@ -42,14 +41,14 @@ class NetworkArchitecture(tf.keras.Model):
             self.layers_a.append(Dense(nodes, activation=self.activation, name='action_layer'))
 
     def state_branch(self, s):
-        '''define state feature extractor'''
+        """Define state feature extractor."""
         out = tf.reshape(tf.convert_to_tensor(s, dtype=tf.float32), shape=[-1,self.dim_s])
         for layer in self.layers_s:
             out = layer(out)
         return out
 
     def action_branch(self, a):
-        '''define action feature extractor'''
+        """Define action feature extractor."""
         if self.arch_type == 'ffnn':
             pass
         elif self.arch_type == 'drrn':
@@ -59,13 +58,13 @@ class NetworkArchitecture(tf.keras.Model):
             return out
 
     def call_ffnn(self, s, training=False):
-        '''forward pass through the created feed-forward network'''
+        """Forward pass through the created feed-forward network."""
         out = self.state_branch(s)
         out = self.layer_out(out)
         return out
 
     def call_drrn(self, s, a=None, training=False):
-        '''forward pass through the created DRRN network'''
+        """Forward pass through the created DRRN network."""
         out_s = self.state_branch(s)
         if a is not None:
             out_a = self.action_branch(a)
